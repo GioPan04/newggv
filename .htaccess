@@ -1,0 +1,7 @@
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "/home/gioele/subdomains/newggv"
+PassengerBaseURI "/"
+PassengerNodejs "/home/gioele/nodevenv/subdomains/newggv/12/bin/node"
+PassengerAppType node
+PassengerStartupFile index.js
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
