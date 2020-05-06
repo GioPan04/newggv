@@ -16,7 +16,7 @@ app.post('/login', (req, res) => {
     const password = req.body.password as string;
 
     db.connect();
-    db.query(`SELECT name,role,passwd FROM users WHERE name = ${username}`, async (err, results: any[]) => {
+    db.query(`SELECT name,role,passwd FROM users WHERE name = "${username}"`, async (err, results: any[]) => {
         if (err) {
             console.log(err);
             res.status(500).json({
