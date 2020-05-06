@@ -16,7 +16,9 @@ app.post('/login', (req, res) => {
     const password = req.body.password as string;
 
     db.connect();
-    db.query(`SELECT name,role,passwd FROM users WHERE name = ${username}`, async (err, [{ name, role, passwd }]: any[]) => {
+    db.query(`SELECT name,role,passwd FROM users WHERE name = ${username}`, async (err, results: any[]) => {
+
+        console.log(results);
         if (err) {
             console.log(err);
             res.status(500).json({
@@ -25,18 +27,17 @@ app.post('/login', (req, res) => {
             });
             return;
         }
-        
-        if (await bcrypt.compare(password, passwd)) {
-            res.cookie('session', jwt.sign({
-                name,
-                role
-            }, process.env.jwt_secret as string)).status(200).json({logged: true});
-        } else {
-            res.status(401).json({
-                error: "Username o password errati",
-                logged: false,
-            });
-        }
+        // if (await bcrypt.compare(password, passwd)) {
+        //     res.cookie('session', jwt.sign({
+        //         name,
+        //         role
+        //     }, process.env.jwt_secret as string)).status(200).json({logged: true});
+        // } else {
+        //     res.status(401).json({
+        //         error: "Username o password errati",
+        //         logged: false,
+        //     });
+        // }
     });
     db.end();
 });
