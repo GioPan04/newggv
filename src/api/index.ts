@@ -1,13 +1,6 @@
 import { Router, json, urlencoded } from 'express';
 
-import mysql from 'mysql';
-
-const db = mysql.createConnection({
-    user: process.env.db_user,
-    password: process.env.db_password,
-    database: process.env.db_name,
-    host: 'pangio.it',
-});
+import db from '../db';
 
 const router = Router();
 
@@ -15,10 +8,11 @@ router.use(urlencoded({ extended: true }));
 router.use(json());
 
 router.get('/get_articles', (req, res) => {
-    const start = parseInt(req.query.start as string);
-    const limit = parseInt(req.query.limit as string);
+    const start = parseInt(req.query.start as string) ?? 0;
+    const limit = parseInt(req.query.limit as string) ?? 10;
+
     db.connect();
-    db.query(`SELECT * FROM editions`, (err, data: any[], field) => {
+    db.query(`SELECT * FROM editions LIMIT ${start}, ${limit}`, (err, data: any[]) => {
         if (err) {
             console.log(err);
 
@@ -29,7 +23,7 @@ router.get('/get_articles', (req, res) => {
         }
         res.json({ data });
     });
-
+    db.end();
 });
 
 router.post('/new_article', (req, res) =>  {
