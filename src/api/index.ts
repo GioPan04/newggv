@@ -18,7 +18,7 @@ router.get('/get_articles', (req, res) => {
     const start = parseInt(req.query.start as string);
     const limit = parseInt(req.query.limit as string);
     db.connect();
-    db.query(`SELECT * FROM editions LIMIT ${start}, ${limit}`, (err, data: any[], field) => {
+    db.query(`SELECT * FROM editions`, (err, data: any[], field) => {
         if (err) {
             console.log(err);
 

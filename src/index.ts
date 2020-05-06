@@ -6,6 +6,6 @@ const app = express();
 
 app.use('/api', api);
 
-app.listen(80, () => {
+app.listen(3000, () => {
     console.log("Server is listening port 80");
 });
