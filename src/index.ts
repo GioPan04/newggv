@@ -17,6 +17,15 @@ app.post('/login', (req, res) => {
 
     db.connect();
     db.query(`SELECT name,role,passwd FROM users WHERE name = ${username}`, async (err, [{ name, role, passwd }]: any[]) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({
+                error: 'Errore del database',
+                logged: false,
+            });
+            return;
+        }
+        
         if (await bcrypt.compare(password, passwd)) {
             res.cookie('session', jwt.sign({
                 name,
