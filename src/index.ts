@@ -9,6 +9,8 @@ const app = express();
 
 app.use(urlencoded({ extended: true }));
 
+app.use('/', express.static('public'));
+
 app.use('/api', api);
 
 app.post('/login', (req, res) => {

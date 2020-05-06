@@ -1,10 +1,13 @@
-import { Router, json, urlencoded } from 'express';
+import { Router, json, urlencoded, NextFunction, Request, Response } from 'express';
+import cookie from 'cookie-parser';
+import jwt from 'jsonwebtoken';
 
 import db from '../db';
 
 const router = Router();
 
 router.use(urlencoded({ extended: true }));
+router.use(cookie());
 router.use(json());
 
 router.get('/get_articles', (req, res) => {
@@ -26,8 +29,24 @@ router.get('/get_articles', (req, res) => {
     db.end();
 });
 
-router.post('/new_article', (req, res) =>  {
+function requireLogin(req: Request, res: Response, next: NextFunction) {
+    let session: any;
+    try {
+        session = jwt.verify(req.cookies.session, process.env.jwt_secret as string);
+    } catch (err) {
+        res.status(401).json({ error: 'Non autorizzato' });
+        return;
+    }
+    (req as any).session = session;
+    next();
+}
 
+interface RequestWithSession extends Request {
+    session: any;
+}
+
+router.post('/new_article', requireLogin, (req, res) =>  {
+    console.log((req as RequestWithSession).session);
 });
 
 router.post('/upload/image', (req, res) => {
