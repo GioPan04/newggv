@@ -27,6 +27,15 @@ app.post('/login', (req, res) => {
             });
             return;
         }
+
+        if (results.length === 0) {
+            res.status(401).json({
+                error: "Username o password errati",
+                logged: false,
+            });
+            return;
+        }
+
         const [{ name, role, passwd }] = results;
 
         if (await bcrypt.compare(password, passwd)) {
