@@ -17,7 +17,6 @@ app.post('/login', (req, res) => {
     const username = req.body.username as string;
     const password = req.body.password as string;
 
-    db.connect();
     db.query(`SELECT name,role,passwd FROM users WHERE name = "${db.escape(username)}"`, async (err, results: any[]) => {
         if (err) {
             console.log(err);
@@ -50,7 +49,6 @@ app.post('/login', (req, res) => {
             });
         }
     });
-    db.end();
 });
 
 app.listen(3000, () => {
