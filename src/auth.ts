@@ -34,7 +34,7 @@ router.post('/login', (req, res) => {
             res.cookie('session', jwt.sign({
                 name,
                 role
-            }, process.env.jwt_secret as string)).status(200).json({logged: true});
+            }, process.env.jwt_secret as string)).status(200).json({error: null, logged: true});
         } else {
             res.status(401).json({
                 error: "Username o password errati",
