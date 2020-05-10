@@ -2,7 +2,7 @@
   "name": "newggv",
   "version": "1.0.0",
   "description": "The new ggv apis",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "debug": "nodemon -e ts -w src/ -x ts-node -r dotenv/config src/index.ts",
     "prod": "node dist/index.js",
