@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "debug": "nodemon -e ts -w src/ -x ts-node -r dotenv/config src/index.ts",
+    "start": "nodemon -e ts -w src/ -x ts-node -r dotenv/config src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
