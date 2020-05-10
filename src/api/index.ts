@@ -31,6 +31,19 @@ router.get('/articles', (req, res) => {
     });
 });
 
+router.get('/articles/:id', (req, res) => {
+    fs.readFile(process.env.articles_dir + `/${req.params.id}.md`, (err, data) => {
+        if(err) {
+            res.status(404).json({
+                error: "L'articolo non esiste"
+            });
+            return;
+        } else {
+            res.status(200).send(data);
+        }
+    });
+});
+
 function requireLogin(req: Request, res: Response, next: NextFunction) {
     let session: any;
     try {
