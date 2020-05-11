@@ -97,6 +97,57 @@ router.post('/new_article', authenticate, (req, res) =>  {
     }
 });
 
+router.post('/sputo', (req, res) => {
+    db.query("(SELECT * FROM sputi WHERE ip = ?) ORDER BY id DESC", [req.ip], (err, data) => {
+        if(err) {
+            console.log(err);
+            res.status(500).json({
+                error: "Errore del database",
+                posted: false,
+            });
+            return;
+        }
+        const timestamp = Date.now();
+        if(timestamp - data[0].timestamp < 24 * 60 * 60 * 1000) {
+            res.status(400).json({
+                error: "Hai già inviato un argomento, aspetta 1 giorno prima di inviarne un'altro",
+                posted: false,
+            });
+            return;
+        }
+        db.query("INSERT INTO sputi (text, ip, timestamp) VALUES (?, ?, ?)", [req.body.text, req.ip, timestamp], (err, data) => {
+            if(err){
+                console.log(err);
+                res.status(500).json({
+                    error: "Errore del database",
+                    posted: false,
+                });
+            }
+            res.status(201).json({
+                error: null,
+                posted: true,
+            });
+        })
+    });
+});
+
+router.get('/sputi', authenticate, (req, res) => {
+    const start = parseInt(req.query.start as string ?? 0);
+    const limit = parseInt(req.query.limit as string ?? 20);
+
+    db.query(`(SELECT * FROM sputi LIMIT ${start}, ${limit}) ORDER BY id DESC`, (err, data: any[]) => {
+        if (err) {
+            console.log(err);
+
+            res.status(500).json({
+                error: "Errore del database"
+            });
+            return;
+        }
+        res.status(200).json(data.map(({ text, timestamp }) => ({ text, timestamp })));
+    });
+});
+
 function sha256(data: Buffer): string {
     const hash = crypto.createHash('sha256');
     hash.update(data);
@@ -144,11 +195,12 @@ router.post('/upload/video', authenticate, upload({limits: { fileSize: 200 * 102
     const video = req.files?.video as upload.UploadedFile;
 
     const title = req.body.title as string;
+    const thumbnailUrl = req.body.title as string;
     const author = req.body.author ?? (req as WithSession).session.name;
     
-    if(!title) {
+    if(!title || !thumbnailUrl) {
         res.status(400).json({
-            error: "Titolo è vuoto",
+            error: "Titolo o la copertina sono vuoti",
             uploaded: false,
         });
         return;
