@@ -11,6 +11,9 @@ import db from '../db';
 const router = Router();
 
 const storage = multer.diskStorage({
+    destination(req, file, cb) {
+        cb(null, process.env.images_dir as string);
+    },
     filename(req, file, cb) {
         if (!file.mimetype.startsWith('image/')) {
             cb(new Error("No image"), '');
@@ -28,7 +31,6 @@ const storage = multer.diskStorage({
 });
 
 const images = multer({
-    dest: process.env.images_dir,
     storage
 });
 
