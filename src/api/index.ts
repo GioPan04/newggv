@@ -1,12 +1,31 @@
 import { Router, json, urlencoded, NextFunction, Request, Response } from 'express';
 import cookie from 'cookie-parser';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import multer from 'multer';
 import fs from 'fs';
 
 import { authenticate, WithSession } from '../auth';
 import db from '../db';
 
 const router = Router();
+
+const storage = multer.diskStorage({
+    filename(req, file, cb) {
+        if (!file.mimetype.startsWith('image/')) {
+            cb(new Error("No image"), '');
+            return;
+        }
+        const hash = crypto.createHash('sha-256');
+        hash.update(file.buffer);
+        cb(null, hash.digest('base64'));
+    }
+});
+
+const images = multer({
+    dest: process.env.images_dir,
+    storage
+});
 
 router.use(urlencoded({ extended: true }));
 router.use(cookie());
@@ -94,11 +113,15 @@ router.post('/new_article', authenticate, (req, res) =>  {
     }
 });
 
-router.post('/upload/image', (req, res) => {
-    
+router.post('/upload/image', authenticate, images.single('image'), (req, res) => {
+    res.status(201).json({
+        error: null,
+        uploaded: true,
+        url: 'https://ggv.pangio.it/photo/' + req.file.filename
+    });
 });
 
-router.post('/upload/video', (req, res) => {
+router.post('/upload/video', authenticate, (req, res) => {
 
 });
 
