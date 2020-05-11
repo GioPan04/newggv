@@ -1,6 +1,7 @@
 import { Router, json, urlencoded, NextFunction, Request, Response } from 'express';
 import cookie from 'cookie-parser';
 import crypto from 'crypto';
+import { PassThrough } from 'stream';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import fs from 'fs';
@@ -19,9 +20,12 @@ const storage = multer.diskStorage({
             cb(new Error("No image"), '');
             return;
         }
+
+        const stream = file.stream.pipe(new PassThrough());
+
         const hash = crypto.createHash('sha256');
         const chunks: Buffer[] = [];
-        file.stream.on('data', chunk => {
+        stream.on('data', chunk => {
             chunks.push(chunk);
         }).on('end', () => {
             hash.update(Buffer.concat(chunks));
