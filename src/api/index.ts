@@ -3,6 +3,7 @@ import cookie from 'cookie-parser';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 
+import { authenticate, WithSession } from '../auth';
 import db from '../db';
 
 const router = Router();
@@ -56,15 +57,11 @@ function requireLogin(req: Request, res: Response, next: NextFunction) {
     next();
 }
 
-interface RequestWithSession extends Request {
-    session: any;
-}
-
-router.post('/new_article', requireLogin, (req, res) =>  {
-    const session = (req as RequestWithSession).session;
-    const author: String = req.body.author ?? session.name;
-    const title: String = req.body.title;
-    const article: String = req.body.article;
+router.post('/new_article', authenticate, (req, res) =>  {
+    const session = (req as WithSession).session;
+    const author: string = req.body.author ?? session.name;
+    const title: string = req.body.title;
+    const article: string = req.body.article;
     if (article == null || title == null) {
         res.status(400).json({
             error: "L'articolo e/o il titolo sono vuoti",
@@ -72,7 +69,7 @@ router.post('/new_article', requireLogin, (req, res) =>  {
         });
         return;
     } else {
-        db.query(`INSERT INTO editions (title, author) VALUES ("${title}", "${author}");`, (err, data) => {
+        db.query(`INSERT INTO editions (title, author) VALUES (?, ?);`, [title, author], (err, data) => {
             if(err) {
                 console.log(err);
                 res.status(500).json({
