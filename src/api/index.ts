@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
             chunks.push(chunk);
         }).on('end', () => {
             hash.update(Buffer.concat(chunks));
-            cb(null, hash.digest('base64'));
+            cb(null, hash.digest('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '') + '.' + file.mimetype.slice(6));
         });
     }
 });
