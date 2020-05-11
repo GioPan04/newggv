@@ -40,7 +40,7 @@ router.get('/articles/:id', (req, res) => {
             });
             return;
         } else {
-            db.query("UPDATE articles SET views = views + 1 WHERE id = ?", [req.params.id], (err, data) => {
+            db.query("UPDATE editions SET views = views + 1 WHERE id = ?", [req.params.id], (err, data) => {
                 if(err) console.log(err);
             });
             res.status(200).send(data);
