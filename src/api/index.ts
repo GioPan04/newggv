@@ -40,7 +40,9 @@ router.get('/articles/:id', (req, res) => {
             });
             return;
         } else {
-            db.query("UPDATE articles SET views = views + 1 WHERE id = ?", [req.params.id]);
+            db.query("UPDATE articles SET views = views + 1 WHERE id = ?", [req.params.id], (err, data) => {
+                if(err) console.log(err);
+            });
             res.status(200).send(data);
         }
     });
@@ -61,7 +63,7 @@ router.post('/new_article', authenticate, (req, res) =>  {
         });
         return;
     } else {
-        db.query(`INSERT INTO editions (title, author) VALUES (?, ?);`, [title, author], (err, data) => {
+        db.query(`INSERT INTO editions (title, author, thumbnailUrl, date, views) VALUES (?, ?, ?, ?, ?);`, [title, author, thumbnailUrl, date, views], (err, data) => {
             if(err) {
                 console.log(err);
                 res.status(500).json({
