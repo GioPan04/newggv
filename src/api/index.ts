@@ -130,14 +130,36 @@ router.post('/upload/image', authenticate, upload({limits: { fileSize: 10 * 1024
     });
 });
 
-router.post('/upload/video', authenticate, upload({limits: { fileSize: 200 * 1024 * 1024 },}), (req, res) => {
+router.post('/upload/video', authenticate, upload({limits: { fileSize: 200 * 1024 * 1024 }, tempFileDir: '/tmp/', useTempFiles: true }), (req, res) => {
     const video = req.files?.video as upload.UploadedFile;
 
-    const { author, title } = req.body as { author: string, title: string };
+    const title = req.body.title as string;
+    const author = req.body.author ?? (req as WithSession).session.name;
+    
+    if(!title) {
+        res.status(400).json({
+            error: "Titolo è vuoto",
+            uploaded: false,
+        });
+        return;
+    }
 
-    // const title = req.body.title as string;
-    // const author = req.body.author as string;
-    console.log(author, title);
+    db.query("INSERT INTO videos (title, author) VALUES (?, ?)", [title, author], (err, data) => {
+        if(err) {
+            console.log(err);
+            res.status(500).json({
+                error: "Errore del database",
+                uploaded: false,
+            });
+            return;
+        }
+        const id = data.insertId;
+        video.mv(join(process.env.videos_dir as string, id + '.' + video.mimetype.slice(6)));
+        res.status(201).json({
+            error: null,
+            uploaded: true,
+        });
+    });
 });
 
 export default router;
