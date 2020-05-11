@@ -23,7 +23,10 @@
 </script>
 
 <main>
-    <form>
+    <form on:submit={ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+    }}>
         <input type="text" bind:value={username}/>
         <input type="password" bind:value={password}/>
         <input type="submit" value="Login" on:click={() => loginStatus = login()}/>
