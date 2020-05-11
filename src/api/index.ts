@@ -20,7 +20,7 @@ router.get('/articles', (req, res) => {
     const start = parseInt(req.query.start as string ?? 0);
     const limit = parseInt(req.query.limit as string ?? 10);
 
-    db.query(`SELECT * FROM editions LIMIT ${start}, ${limit}`, (err, data: any[]) => {
+    db.query(`(SELECT * FROM editions LIMIT ${start}, ${limit} ORDER BY id DESC) ORDER BY id DESC`, (err, data: any[]) => {
         if (err) {
             console.log(err);
 
@@ -178,7 +178,7 @@ router.get('/videos', (req, res) => {
     const start = parseInt(req.query.start as string ?? 0);
     const limit = parseInt(req.query.limit as string ?? 10);
 
-    db.query(`SELECT * FROM videos LIMIT ${start}, ${limit}`, (err, data: any[]) => {
+    db.query(`(SELECT * FROM videos LIMIT ${start}, ${limit} ORDER BY id DESC) ORDER BY id DESC`, (err, data: any[]) => {
         if (err) {
             console.log(err);
 
