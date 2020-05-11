@@ -40,6 +40,7 @@ router.get('/articles/:id', (req, res) => {
             });
             return;
         } else {
+            db.query("UPDATE articles SET views = views + 1 WHERE id = ?", [req.params.id]);
             res.status(200).send(data);
         }
     });
@@ -49,6 +50,9 @@ router.post('/new_article', authenticate, (req, res) =>  {
     const session = (req as WithSession).session;
     const author: string = req.body.author ?? session.name;
     const title: string = req.body.title;
+    const thumbnailUrl: string = req.body.thumbnailUrl;
+    const date: number = Date.now();
+    const views: number = req.body.views ?? 0;
     const article: string = req.body.article;
     if (article == null || title == null) {
         res.status(400).json({
