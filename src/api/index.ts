@@ -17,8 +17,13 @@ const storage = multer.diskStorage({
             return;
         }
         const hash = crypto.createHash('sha256');
-        hash.update(file.buffer);
-        cb(null, hash.digest('base64'));
+        const chunks: Buffer[] = [];
+        file.stream.on('data', chunk => {
+            chunks.push(chunk);
+        }).on('end', () => {
+            hash.update(Buffer.concat(chunks));
+            cb(null, hash.digest('base64'));
+        });
     }
 });
 
