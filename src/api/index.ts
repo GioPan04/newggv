@@ -130,10 +130,10 @@ router.post('/upload/image', authenticate, upload({limits: { fileSize: 10 * 1024
     });
 });
 
-router.post('/upload/video', authenticate, upload({limits: { fileSize: 200 * 1024 * 1024 },}), (req, res) => {
-    const video = req.files?.video as upload.UploadedFile;
+// router.post('/upload/video', authenticate, upload({limits: { fileSize: 200 * 1024 * 1024 },}), (req, res) => {
+//     const video = req.files?.video as upload.UploadedFile;
     
 
-});
+// });
 
 export default router;
