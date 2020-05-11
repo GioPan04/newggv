@@ -5,13 +5,17 @@
     let loginStatus;
 
     async function login() {
+
         const formData = new URLSearchParams();
         formData.append('username', username);
         formData.append('password', password);
 
         const res = await fetch('/api/login', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData,
         });
 
         const data = await res.json();

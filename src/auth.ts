@@ -22,7 +22,7 @@ router.post('/login', (req, res) => {
 
         if (results.length === 0) {
             res.status(401).json({
-                error: "Username o password errati",
+                error: "Username non registrato",
                 logged: false,
             });
             return;
