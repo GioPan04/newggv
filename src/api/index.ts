@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
             cb(new Error("No image"), '');
             return;
         }
-        const hash = crypto.createHash('sha-256');
+        const hash = crypto.createHash('sha256');
         hash.update(file.buffer);
         cb(null, hash.digest('base64'));
     }
