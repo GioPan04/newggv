@@ -17,7 +17,6 @@ router.use(cookie());
 router.use(json());
 
 router.get('/articles', (req, res) => {
-
     const start = parseInt(req.query.start as string ?? 0);
     const limit = parseInt(req.query.limit as string ?? 10);
 
@@ -130,6 +129,17 @@ router.post('/upload/image', authenticate, upload({limits: { fileSize: 10 * 1024
     });
 });
 
+const mimeTypeToExt: { [key: string]: string } = {
+    "video/x-flv": ".flv",
+    "video/mp4": ".mp4",
+    "application/x-mpegURL": "m3u8",
+    "video/MP2T": ".ts",
+    "video/3gpp": ".3gp",
+    "video/quicktime": ".mov",
+    "video/x-msvideo": ".avi",
+    "video/x-ms-wmv": ".wmv"
+};
+
 router.post('/upload/video', authenticate, upload({limits: { fileSize: 200 * 1024 * 1024 }, tempFileDir: '/tmp/', useTempFiles: true }), (req, res) => {
     const video = req.files?.video as upload.UploadedFile;
 
@@ -144,7 +154,9 @@ router.post('/upload/video', authenticate, upload({limits: { fileSize: 200 * 102
         return;
     }
 
-    db.query("INSERT INTO videos (title, author) VALUES (?, ?)", [title, author], (err, data) => {
+    const ext = mimeTypeToExt[video.mimetype];
+
+    db.query("INSERT INTO videos (title, author, ext) VALUES (?, ?, ?)", [title, author, ext], (err, data) => {
         if(err) {
             console.log(err);
             res.status(500).json({
@@ -154,10 +166,29 @@ router.post('/upload/video', authenticate, upload({limits: { fileSize: 200 * 102
             return;
         }
         const id = data.insertId;
-        video.mv(join(process.env.videos_dir as string, id + '.' + video.mimetype.slice(6)));
+        video.mv(join(process.env.videos_dir as string, id + ext));
         res.status(201).json({
             error: null,
             uploaded: true,
+        });
+    });
+});
+
+router.get('/videos', (req, res) => {
+    const start = parseInt(req.query.start as string ?? 0);
+    const limit = parseInt(req.query.limit as string ?? 10);
+
+    db.query(`SELECT * FROM videos LIMIT ${start}, ${limit}`, (err, data: any[]) => {
+        if (err) {
+            console.log(err);
+
+            res.status(500).json({
+                error: "Errore del database"
+            });
+            return;
+        }
+        res.status(200).json({
+            data
         });
     });
 });
