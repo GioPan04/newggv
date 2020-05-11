@@ -9,7 +9,7 @@ const app = express();
 app.use(urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use('/', express.static('public'));
+app.use('/', express.static('web/public'));
 
 app.use('/api', api);
 
