@@ -45,18 +45,6 @@ router.get('/articles/:id', (req, res) => {
     });
 });
 
-function requireLogin(req: Request, res: Response, next: NextFunction) {
-    let session: any;
-    try {
-        session = jwt.verify(req.cookies.session, process.env.jwt_secret as string);
-    } catch (err) {
-        res.status(401).json({ error: 'Non autorizzato' });
-        return;
-    }
-    (req as any).session = session;
-    next();
-}
-
 router.post('/new_article', authenticate, (req, res) =>  {
     const session = (req as WithSession).session;
     const author: string = req.body.author ?? session.name;
@@ -69,7 +57,7 @@ router.post('/new_article', authenticate, (req, res) =>  {
         });
         return;
     } else {
-        db.query(`INSERT INTO editions (title, author) VALUES (?, ?);`, [title, author], (err, data) => {
+        db.query(`INSERT INTO editions (title, author) VALUES (?, ?);`, [db.escape(title), db.escape(author)], (err, data) => {
             if(err) {
                 console.log(err);
                 res.status(500).json({
