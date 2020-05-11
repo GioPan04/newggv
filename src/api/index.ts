@@ -3,40 +3,14 @@ import cookie from 'cookie-parser';
 import crypto from 'crypto';
 import { PassThrough } from 'stream';
 import jwt from 'jsonwebtoken';
-import multer from 'multer';
+import upload from 'express-fileupload';
+import { join } from 'path';
 import fs from 'fs';
 
 import { authenticate, WithSession } from '../auth';
 import db from '../db';
 
 const router = Router();
-
-const storage = multer.diskStorage({
-    destination(req, file, cb) {
-        cb(null, process.env.images_dir as string);
-    },
-    filename(req, file, cb) {
-        if (!file.mimetype.startsWith('image/')) {
-            cb(new Error("No image"), '');
-            return;
-        }
-
-        const stream = file.stream.pipe(new PassThrough());
-
-        const hash = crypto.createHash('sha256');
-        const chunks: Buffer[] = [];
-        stream.on('data', chunk => {
-            chunks.push(chunk);
-        }).on('end', () => {
-            hash.update(Buffer.concat(chunks));
-            cb(null, hash.digest('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '') + '.' + file.mimetype.slice(6));
-        });
-    }
-});
-
-const images = multer({
-    storage
-});
 
 router.use(urlencoded({ extended: true }));
 router.use(cookie());
@@ -124,15 +98,41 @@ router.post('/new_article', authenticate, (req, res) =>  {
     }
 });
 
-router.post('/upload/image', authenticate, images.single('image'), (req, res) => {
+function sha256(data: Buffer): string {
+    const hash = crypto.createHash('sha256');
+    hash.update(data);
+    return hash.digest('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+}
+
+router.post('/upload/image', authenticate, upload({limits: { fileSize: 10 * 1024 * 1024 },}), (req, res) => {
+    const image = req.files?.image as upload.UploadedFile;
+
+    if (image.truncated) {
+        res.status(400).json({
+            error: 'File sopra i 10 MB consentiti',
+            uploaded: false,
+            url: null,
+        });
+        return;
+    }
+    
+    const filename = sha256(image.data) + '.' + image.mimetype.slice(6);
+
+    image.mv(join(process.env.images_dir as string, filename), console.log);
+
     res.status(201).json({
         error: null,
         uploaded: true,
-        url: 'https://ggv.pangio.it/photo/' + req.file.filename
+        url: 'https://ggv.pangio.it/photo/' + filename
     });
 });
 
-router.post('/upload/video', authenticate, (req, res) => {
+router.post('/upload/video', authenticate, upload({limits: { fileSize: 200 * 1024 * 1024 },}), (req, res) => {
+    const video = req.files?.video as upload.UploadedFile;
+    
 
 });
 
