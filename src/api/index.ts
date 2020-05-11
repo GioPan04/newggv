@@ -57,7 +57,7 @@ router.post('/new_article', authenticate, (req, res) =>  {
         });
         return;
     } else {
-        db.query(`INSERT INTO editions (title, author) VALUES (?, ?);`, [db.escape(title), db.escape(author)], (err, data) => {
+        db.query(`INSERT INTO editions (title, author) VALUES (?, ?);`, [title, author], (err, data) => {
             if(err) {
                 console.log(err);
                 res.status(500).json({

@@ -15,6 +15,6 @@ app.use('/api', api);
 
 app.use(auth);
 
-app.listen(80, () => {
+app.listen(3000, () => {
     console.log("Server is listening port 80");
 });
