@@ -66,7 +66,7 @@ router.post('/new_article', authenticate, (req, res) =>  {
         });
         return;
     } else {
-        db.query(`INSERT INTO editions (title, author, thumbnailUrl, date, views) VALUES (?, ?, ?, ?, ?);`, [title, author, thumbnailUrl, date, views], (err, data) => {
+        db.query(`INSERT INTO editions (title, author, thumnail_url	, date, views) VALUES (?, ?, ?, ?, ?);`, [title, author, thumbnailUrl, date, views], (err, data) => {
             if(err) {
                 console.log(err);
                 res.status(500).json({
@@ -108,9 +108,9 @@ router.post('/sputo', (req, res) => {
             return;
         }
         const timestamp = Date.now();
-        if(timestamp - data[0].timestamp < 24 * 60 * 60 * 1000) {
+        if(timestamp - data[0]?.timestamp < 60 * 60 * 1000) {
             res.status(400).json({
-                error: "Hai già inviato un argomento, aspetta 1 giorno prima di inviarne un'altro",
+                error: "Hai già inviato uno sputo, aspetta 1 ora prima di inviarne un'altro",
                 posted: false,
             });
             return;
@@ -144,7 +144,7 @@ router.get('/sputi', authenticate, (req, res) => {
             });
             return;
         }
-        res.status(200).json(data.map(({ text, timestamp }) => ({ text, timestamp })));
+        res.status(200).json({data: data.map(({ text, timestamp }) => ({ text, timestamp }))});
     });
 });
 
@@ -159,6 +159,9 @@ function sha256(data: Buffer): string {
 
 router.post('/upload/image', authenticate, upload({limits: { fileSize: 10 * 1024 * 1024 },}), (req, res) => {
     const image = req.files?.image as upload.UploadedFile;
+
+    console.log(req.files);
+    console.log(req.body);
 
     if (image.truncated) {
         res.status(400).json({
@@ -195,7 +198,7 @@ router.post('/upload/video', authenticate, upload({limits: { fileSize: 200 * 102
     const video = req.files?.video as upload.UploadedFile;
 
     const title = req.body.title as string;
-    const thumbnailUrl = req.body.title as string;
+    const thumbnailUrl = req.body.thumbnailUrl as string;
     const author = req.body.author ?? (req as WithSession).session.name;
     
     if(!title || !thumbnailUrl) {
@@ -208,7 +211,7 @@ router.post('/upload/video', authenticate, upload({limits: { fileSize: 200 * 102
 
     const ext = mimeTypeToExt[video.mimetype];
 
-    db.query("INSERT INTO videos (title, author, ext) VALUES (?, ?, ?)", [title, author, ext], (err, data) => {
+    db.query("INSERT INTO videos (title, author, ext, thumbnailUrl) VALUES (?, ?, ?, ?)", [title, author, ext, thumbnailUrl], (err, data) => {
         if(err) {
             console.log(err);
             res.status(500).json({
@@ -239,9 +242,7 @@ router.get('/videos', (req, res) => {
             });
             return;
         }
-        res.status(200).json({
-            data
-        });
+        res.status(200).json({data: data.map(({ id, title, author, ext, thumbnailUrl }) => ({ id, title, author, videoUrl : `http://localhost:3000/5${ext}`, thumbnailUrl }))});
     });
 });
 

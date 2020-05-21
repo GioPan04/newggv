@@ -64,7 +64,9 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
         (req as WithSession).session = jwt.verify(req.cookies.session, process.env.jwt_secret as string) as Session;
     }
     catch (_) {
-        res.sendStatus(401);
+        res.status(401).json({
+            error: "Non sei autorizzato"
+        });
         return;
     }
     next();

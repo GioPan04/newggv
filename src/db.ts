@@ -5,6 +5,7 @@ const db = mysql.createConnection({
     password: process.env.db_password,
     database: process.env.db_name,
     host: 'localhost',
+    charset : 'utf8_general_ci'
 });
 
 export default db;

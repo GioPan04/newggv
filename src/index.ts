@@ -1,5 +1,6 @@
-import express, { urlencoded } from 'express';
+import express, { urlencoded, Request, Response, NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken';
 
 import { resolve } from 'path';
 
@@ -18,7 +19,17 @@ app.use('/api', api);
 app.use('/api', auth);
 
 app.get('*', (req, res) => {
-    res.sendFile(resolve('web/public/index.html'));
+    if (req.path !== '/login') {
+        const session = req.cookies.session;
+        try {
+            jwt.verify(session, process.env.jwt_secret as string);
+        }
+        catch (_) {
+            res.redirect('/login');
+            return;
+        }
+    }
+    res.sendFile(resolve('web/public/main.html'));
 });
 
 app.listen(3000, () => {
