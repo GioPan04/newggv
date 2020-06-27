@@ -97,8 +97,8 @@ router.post('/new_article', authenticate, (req, res) =>  {
     }
 });
 
-router.post('/sputo', (req, res) => {
-    db.query("(SELECT * FROM sputi WHERE ip = ?) ORDER BY id DESC", [req.ip], (err, data) => {
+router.all('/sputo', (req, res) => {
+    db.query("(SELECT * FROM sputi WHERE ip = ?) ORDER BY id DESC", [req.connection.remoteAddress], (err, data) => {
         if(err) {
             console.log(err);
             res.status(500).json({
@@ -115,7 +115,7 @@ router.post('/sputo', (req, res) => {
             });
             return;
         }
-        db.query("INSERT INTO sputi (text, ip, timestamp) VALUES (?, ?, ?)", [req.body.text, req.ip, timestamp], (err, data) => {
+        db.query("INSERT INTO sputi (text, ip, timestamp) VALUES (?, ?, ?)", [req.body.text, req.connection.remoteAddress, timestamp], (err, data) => {
             if(err){
                 console.log(err);
                 res.status(500).json({
@@ -128,7 +128,7 @@ router.post('/sputo', (req, res) => {
                 posted: true,
             });
         })
-    });
+    }); 
 });
 
 router.get('/sputi', (req, res) => {
