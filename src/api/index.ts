@@ -131,7 +131,7 @@ router.post('/sputo', (req, res) => {
     });
 });
 
-router.get('/sputi', authenticate, (req, res) => {
+router.get('/sputi', (req, res) => {
     const start = parseInt(req.query.start as string ?? 0);
     const limit = parseInt(req.query.limit as string ?? 20);
 
