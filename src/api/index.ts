@@ -97,8 +97,31 @@ router.post('/new_article', authenticate, (req, res) =>  {
     }
 });
 
-router.all('/sputo', (req, res) => {
-    db.query("(SELECT * FROM sputi WHERE ip = ?) ORDER BY id DESC", [req.connection.remoteAddress], (err, data) => {
+router.post('/sputo', (req, res) => {
+
+    let text = req.body.text;
+    if(text) {
+        db.query("INSERT INTO sputi (text, timestamp) VALUES (?, ?)", [text, Date.now()], (err, data) => {
+            if(err) {
+                console.error(err);
+                res.status(500).json({
+                    error: "Errore del database",
+                    posted: false,
+                });
+            }
+        });
+        res.status(201).json({
+            error: null,
+            posted: true,
+        });
+    } else {
+        res.status(400).json({
+            error: 'Il campo text è richiesto',
+            posted: false
+        });
+    }
+
+    /* db.query("(SELECT * FROM sputi WHERE ip = ?) ORDER BY id DESC", [req.connection.remoteAddress], (err, data) => {
         if(err) {
             console.log(err);
             res.status(500).json({
@@ -128,7 +151,7 @@ router.all('/sputo', (req, res) => {
                 posted: true,
             });
         })
-    }); 
+    });  */
 });
 
 router.get('/sputi', (req, res) => {
